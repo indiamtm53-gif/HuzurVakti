@@ -1,34 +1,40 @@
-name: APK Uretici
+name: Android APK Üretici
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ "main", "master" ] # Kod hangi dala yüklendiğinde çalışacağını belirtir
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch: # Tarayıcı üzerinden manuel olarak da başlatabilmenizi sağlar
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Node.js Kur
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
+    # 1. Adım: Depodaki kodları iş akışına çeker
+    - name: Kodu Klonla
+      uses: actions/checkout@v4
 
-      - name: Paketleri Yukle
-        run: npm install
+    # 2. Adım: Java (JDK 17) ortamını kurar
+    - name: Java JDK 17 Kurulumu
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'zulu'
+        cache: 'gradle'
 
-      - name: Android Klasorunu Olustur
-        run: npx expo prebuild --platform android
+    # 3. Adım: Gradle çalıştırma yetkisini verir
+    - name: Gradle Yetkilendirmesi
+      run: chmod +x ./gradlew
 
-      - name: APK Derle
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleRelease
+    # 4. Adım: APK dosyasını derler (Debug sürümü)
+    - name: APK Derleme (Assemble Debug)
+      run: ./gradlew assembleDebug
 
-      - name: APK Dosyasini Indir
-        uses: actions/upload-artifact@v4
-        with:
-          name: HuzurVakti-App
-          path: android/app/build/outputs/apk/release/app-release.apk
+    # 5. Adım: Üretilen APK dosyasını GitHub paneline yükler (İndirilebilir hale getirir)
+    - name: APK Dosyasını Çıktı Olarak Yükle
+      uses: actions/artifacts/upload-artifact@v4
+      with:
+        name: android-debug-apk
+        path: app/build/outputs/apk/debug/app-debug.apk
