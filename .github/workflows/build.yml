@@ -1,0 +1,34 @@
+name: APK Uretici
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Node.js Kur
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Paketleri Yukle
+        run: npm install
+
+      - name: Android Klasorunu Olustur
+        run: npx expo prebuild --platform android
+
+      - name: APK Derle
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease
+
+      - name: APK Dosyasini Indir
+        uses: actions/upload-artifact@v4
+        with:
+          name: HuzurVakti-App
+          path: android/app/build/outputs/apk/release/app-release.apk
