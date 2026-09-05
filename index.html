@@ -82,9 +82,11 @@
     .vakit-item { background: var(--card-bg); padding: 14px 18px; border-radius: 12px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .vakit-saat { font-size: 16px; font-weight: bold; color: var(--primary); }
 
-    /* Bildirim İzin Kartı */
-    .noti-card { background: var(--card-bg); border: 1px dashed var(--primary); padding: 12px 16px; border-radius: 12px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
-    .noti-text { font-size: 12px; color: var(--text-sub); }
+    /* Bildirim & Ezan Ses Kartı */
+    .setting-card { background: var(--card-bg); border: 1px dashed var(--primary); padding: 12px 16px; border-radius: 12px; margin-bottom: 14px; }
+    .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .setting-row:last-child { margin-bottom: 0; }
+    .setting-text { font-size: 12px; color: var(--text-sub); }
 
     /* REKLAM BANNER ALANI */
     .ad-banner { background: #334155; border: 1px dashed #64748B; border-radius: 12px; padding: 12px; text-align: center; margin-bottom: 14px; position: relative; }
@@ -270,7 +272,7 @@
 
   <!-- 1. VAKİTLER SAYFASI -->
   <div id="page-vakitler" class="page-content active">
-    <!-- ÖRNEK REKLAM BANNER 1 -->
+    <!-- REKLAM BANNER 1 -->
     <div class="ad-banner app-ad-element">
       <div class="ad-title">Sponsorlu Reklam</div>
       <div class="ad-content">📢 Hac ve Umre Turlarında %20 İndirim Fırsatı!</div>
@@ -283,10 +285,41 @@
       <div style="font-size: 12px; opacity: 0.9;" id="bugun-tarih">--.--.----</div>
     </div>
 
-    <!-- BİLDİRİM İZİN KARTI -->
-    <div class="noti-card" id="noti-permission-box">
-      <div class="noti-text">Ezan ve 30 dk kala bildirimleri için izin verin:</div>
-      <button class="btn-inline" onclick="bildirimİzniIste()">İzin Ver 🔔</button>
+    <!-- BİLDİRİM VE EZAN SESİ AYARLARI -->
+    <div class="setting-card">
+      <div class="setting-row" id="noti-permission-box">
+        <div class="setting-text">Namaz Bildirimleri:</div>
+        <button class="btn-inline" onclick="bildirimİzniIste()">İzin Ver 🔔</button>
+      </div>
+      <div class="setting-row" style="margin-top: 8px;">
+        <div class="setting-text">Ezan Okuyacak İmam / Müezzin:</div>
+        <select id="imam-sec" onchange="imamDegistir()" style="max-width: 170px;">
+          <option value="1">1. Mekke - Mescid-i Haram</option>
+          <option value="2">2. Medine - Mescid-i Nebevi</option>
+          <option value="3">3. Mescid-i Aksa (Kudüs)</option>
+          <option value="4">4. İstanbul - Rast Makamı</option>
+          <option value="5">5. İstanbul - Hicaz Makamı</option>
+          <option value="6">6. İstanbul - Uşşak Makamı</option>
+          <option value="7">7. Abdülbasit Abdüssamed</option>
+          <option value="8">8. Ali Ahmed Mulla</option>
+          <option value="9">9. Saad El Ghamidi</option>
+          <option value="10">10. Mishary Rashid Alafasy</option>
+          <option value="11">11. Mustafa İsmail</option>
+          <option value="12">12. Muhammed Siddiq Minshawi</option>
+          <option value="13">13. Maher Al Muaiqly</option>
+          <option value="14">14. Nasser Al Qatami</option>
+          <option value="15">15. Yasser Al Dosari</option>
+          <option value="16">16. Mahmoud Khalil Al-Hussary</option>
+          <option value="17">17. Ahmed Al Ajmi</option>
+          <option value="18">18. Bandar Baleela</option>
+          <option value="19">19. Raad Al Kurdi</option>
+          <option value="20">20. Fatih Çollak (Türkiye)</option>
+        </select>
+      </div>
+      <div class="setting-row" style="margin-top: 8px;">
+        <div class="setting-text">Ezan Sesini Dinle:</div>
+        <button class="btn-inline" onclick="ezanDurdurVeyaCal()">▶️ Sesi Dinle / Durdur</button>
+      </div>
     </div>
 
     <div class="card">
@@ -320,7 +353,7 @@
       <button class="btn-secondary" onclick="hedefDegistir()">Hedef Değiştir</button>
     </div>
 
-    <!-- ÖRNEK REKLAM BANNER 2 -->
+    <!-- REKLAM BANNER 2 -->
     <div class="ad-banner app-ad-element">
       <div class="ad-title">Sponsorlu Reklam</div>
       <div class="ad-content">📚 Dijital Kuran-ı Kerim ve Meal Uygulaması</div>
@@ -454,6 +487,58 @@
     document.getElementById('tema-sec').value = varsayilanTema;
     document.documentElement.setAttribute('data-theme', varsayilanTema);
 
+    // --- 20 FARKLI İMAM / MÜEZZİN SES LİSTESİ ---
+    const ezanSesleri = {
+      "1": "https://media.blubrry.com/muslim_central_quran/podcasts.qurancentral.com/makkah-adhan.mp3",
+      "2": "https://media.blubrry.com/muslim_central_quran/podcasts.qurancentral.com/madinah-adhan.mp3",
+      "3": "https://cdn.islamicfinder.org/athan/mp3/AlAqsa.mp3",
+      "4": "https://cdn.islamicfinder.org/athan/mp3/Turkey.mp3",
+      "5": "https://cdn.islamicfinder.org/athan/mp3/Turkey2.mp3",
+      "6": "https://cdn.islamicfinder.org/athan/mp3/Makkah.mp3",
+      "7": "https://media.blubrry.com/muslim_central_quran/podcasts.qurancentral.com/abdul-basit-abdus-samad/abdul-basit-abdus-samad-adhan.mp3",
+      "8": "https://media.blubrry.com/muslim_central_quran/podcasts.qurancentral.com/ali-ahmed-mulla/ali-ahmed-mulla-adhan.mp3",
+      "9": "https://media.blubrry.com/muslim_central_quran/podcasts.qurancentral.com/saad-el-ghamidi/saad-el-ghamidi-adhan.mp3",
+      "10": "https://media.blubrry.com/muslim_central_quran/podcasts.qurancentral.com/mishary-rashid-alafasy/mishary-rashid-alafasy-adhan.mp3",
+      "11": "https://cdn.islamicfinder.org/athan/mp3/Egypt.mp3",
+      "12": "https://cdn.islamicfinder.org/athan/mp3/Minshawi.mp3",
+      "13": "https://cdn.islamicfinder.org/athan/mp3/Madinah.mp3",
+      "14": "https://cdn.islamicfinder.org/athan/mp3/Kuwait.mp3",
+      "15": "https://cdn.islamicfinder.org/athan/mp3/Dubai.mp3",
+      "16": "https://cdn.islamicfinder.org/athan/mp3/Bosnia.mp3",
+      "17": "https://cdn.islamicfinder.org/athan/mp3/Malaysia.mp3",
+      "18": "https://cdn.islamicfinder.org/athan/mp3/Indonesia.mp3",
+      "19": "https://cdn.islamicfinder.org/athan/mp3/Pakistan.mp3",
+      "20": "https://cdn.islamicfinder.org/athan/mp3/Turkey.mp3"
+    };
+
+    let audioPlayer = new Audio();
+    const kayitliImam = localStorage.getItem('seciliImam') || "1";
+    document.getElementById('imam-sec').value = kayitliImam;
+
+    function imamDegistir() {
+      const yeniImam = document.getElementById('imam-sec').value;
+      localStorage.setItem('seciliImam', yeniImam);
+      if (!audioPlayer.paused) {
+        ezanCal();
+      }
+    }
+
+    function ezanCal() {
+      const imamId = document.getElementById('imam-sec').value;
+      const url = ezanSesleri[imamId] || ezanSesleri["1"];
+      audioPlayer.src = url;
+      audioPlayer.play().catch(e => console.log("Ses oynatma engellendi: ", e));
+    }
+
+    function ezanDurdurVeyaCal() {
+      if (!audioPlayer.paused) {
+        audioPlayer.pause();
+        audioPlayer.currentTime = 0;
+      } else {
+        ezanCal();
+      }
+    }
+
     // --- PREMİUM & REKLAM YÖNETİMİ ---
     let isPremium = localStorage.getItem('isPremium') === 'true';
 
@@ -551,8 +636,6 @@
       aktifTimers.forEach(t => clearTimeout(t));
       aktifTimers = [];
 
-      if (!('Notification' in window) || Notification.permission !== 'granted') return;
-
       const simdi = new Date();
       const vakitIsimleri = {
         Imsak: "İmsak",
@@ -570,11 +653,12 @@
         const vakitTarihi = new Date();
         vakitTarihi.setHours(saat, dakika, 0, 0);
 
-        // 1. Tam Vakit Bildirimi
+        // 1. Tam Vakit Bildirimi ve Sesli Ezan
         const tamVakitFark = vakitTarihi.getTime() - simdi.getTime();
         if (tamVakitFark > 0) {
           const timerId = setTimeout(() => {
             bildirimGonder("Ezan Vakti!", `${vakitIsimleri[key]} vakti girdi.`);
+            ezanCal(); // Ezan vakti girdiğinde seçili imamın sesini çal
           }, tamVakitFark);
           aktifTimers.push(timerId);
         }
