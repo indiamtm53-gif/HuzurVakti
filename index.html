@@ -82,6 +82,11 @@
     .vakit-item { background: var(--card-bg); padding: 14px 18px; border-radius: 12px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .vakit-saat { font-size: 16px; font-weight: bold; color: var(--primary); }
 
+    /* Günün Meali Özel Kartı */
+    .meal-card { background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(15,23,42,0.6)); border: 1px solid var(--primary); padding: 16px; border-radius: 16px; margin-bottom: 14px; }
+    .meal-text { font-size: 14px; color: var(--text-main); font-style: italic; line-height: 1.5; margin-bottom: 8px; }
+    .meal-source { font-size: 12px; color: var(--primary); font-weight: bold; text-align: right; }
+
     /* Bildirim & Ezan Ses Kartı */
     .setting-card { background: var(--card-bg); border: 1px dashed var(--primary); padding: 12px 16px; border-radius: 12px; margin-bottom: 14px; }
     .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -125,7 +130,10 @@
     .kible-degree { font-size: 28px; font-weight: bold; color: var(--primary); margin-top: 10px; }
 
     /* 5. TAKVİM & ESMAÜL HÜSNA SAYFASI */
-    .dini-gun-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+    .dini-gun-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 8px; font-size: 13px; }
+    .dini-gun-item.today { border-color: var(--primary); background: rgba(16,185,129,0.1); }
+    .dini-gun-badge { font-size: 10px; background: var(--primary); color: #FFF; padding: 2px 6px; border-radius: 6px; margin-left: 6px; }
+
     .esma-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
     .esma-card { background: var(--bg-color); border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; text-align: center; }
     .esma-tr { font-weight: bold; font-size: 13px; color: var(--primary); }
@@ -285,14 +293,21 @@
       <div style="font-size: 12px; opacity: 0.9;" id="bugun-tarih">--.--.----</div>
     </div>
 
+    <!-- GÜNÜN MEALİ KARTI -->
+    <div class="meal-card">
+      <div class="card-title" style="margin-bottom:6px;">📖 Günün Meali</div>
+      <div class="meal-text" id="gunun-meali-metni">Yükleniyor...</div>
+      <div class="meal-source" id="gunun-meali-kaynak">--</div>
+    </div>
+
     <!-- BİLDİRİM VE EZAN SESİ AYARLARI -->
     <div class="setting-card">
       <div class="setting-row" id="noti-permission-box">
-        <div class="setting-text">Namaz Bildirimleri:</div>
+        <div class="setting-text">Namaz & Günün Meali Bildirimi:</div>
         <button class="btn-inline" onclick="bildirimİzniIste()">İzin Ver 🔔</button>
       </div>
       <div class="setting-row" style="margin-top: 8px;">
-        <div class="setting-text">Ezan Okuyacak İmam / Müezzin:</div>
+        <div class="setting-text">Ezan Okuyacak İmam:</div>
         <select id="imam-sec" onchange="imamDegistir()" style="max-width: 170px;">
           <option value="1">1. Mekke - Mescid-i Haram</option>
           <option value="2">2. Medine - Mescid-i Nebevi</option>
@@ -320,11 +335,6 @@
         <div class="setting-text">Ezan Sesini Dinle:</div>
         <button class="btn-inline" onclick="ezanDurdurVeyaCal()">▶️ Sesi Dinle / Durdur</button>
       </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Günün Ayeti</div>
-      <div style="font-size: 13px; color: var(--text-sub); font-style: italic;">"Şüphesiz kalpler ancak Allah'ı anmakla huzur bulur." (Râd, 28)</div>
     </div>
 
     <div id="vakit-listesi"></div>
@@ -412,14 +422,11 @@
     </div>
   </div>
 
-  <!-- 5. TAKVİM & ESMAÜL HÜSNA SAYFASI -->
+  <!-- 5. DİNİ TAKVİM & ESMAÜL HÜSNA SAYFASI -->
   <div id="page-rehber" class="page-content">
     <div class="card">
-      <div class="card-title">Dini Günler & Kandiller</div>
-      <div class="dini-gun-item"><span>Ramazan Başlangıcı</span><span style="color:var(--primary); font-weight:bold;">1 Mart</span></div>
-      <div class="dini-gun-item"><span>Kadir Gecesi</span><span style="color:var(--primary); font-weight:bold;">26 Mart</span></div>
-      <div class="dini-gun-item"><span>Ramazan Bayramı (1.Gün)</span><span style="color:var(--primary); font-weight:bold;">30 Mart</span></div>
-      <div class="dini-gun-item"><span>Kurban Bayramı (1.Gün)</span><span style="color:var(--primary); font-weight:bold;">6 Haziran</span></div>
+      <div class="card-title">📅 Dini Günler & Kandiller Takvimi</div>
+      <div id="dini-gunler-container"></div>
     </div>
 
     <div class="card">
@@ -467,9 +474,9 @@
       <span class="tab-icon">🕋</span>
       <span>Kıble</span>
     </button>
-    <button class="tab-btn" onclick="tabDegistir('rehber', 'Dini Rehber', this)">
+    <button class="tab-btn" onclick="tabDegistir('rehber', 'Dini Rehber & Takvim', this)">
       <span class="tab-icon">✨</span>
-      <span>Rehber</span>
+      <span>Takvim</span>
     </button>
   </div>
 
@@ -486,6 +493,70 @@
     const varsayilanTema = localStorage.getItem('seciliTema') || 'yesil';
     document.getElementById('tema-sec').value = varsayilanTema;
     document.documentElement.setAttribute('data-theme', varsayilanTema);
+
+    // --- HER GÜN YENİLENEN AYET MEALLERİ HAVUZU ---
+    const mealler = [
+      { text: "Şüphesiz kalpler ancak Allah'ı anmakla huzur bulur.", source: "Râd Suresi, 28" },
+      { text: "Bana dua edin, duanıza cevap vereyim.", source: "Mü'min Suresi, 60" },
+      { text: "Şüphesiz zorlukla beraber bir kolaylık vardır.", source: "İnşirâh Suresi, 6" },
+      { text: "Allah sabredenlerle beraberdir.", source: "Bakara Suresi, 153" },
+      { text: "Kim Allah'a güvenirse, O kendisine yeter.", source: "Talâk Suresi, 3" },
+      { text: "Rabbin seni terk etmedi ve sana darılmadı.", source: "Duhâ Suresi, 3" },
+      { text: "İnsan için ancak çalıştığının karşılığı vardır.", source: "Necm Suresi, 39" },
+      { text: "O, yeryüzünde olanların hepsini sizin için yarattı.", source: "Bakara Suresi, 29" }
+    ];
+
+    // Günün Mealini Yılın Gününe Göre Seçme
+    function gununMealiniGetir() {
+      const baslangic = new Date(bugun.getFullYear(), 0, 0);
+      const fark = bugun - baslangic;
+      const birGun = 1000 * 60 * 60 * 24;
+      const yilGunu = Math.floor(fark / birGun);
+      
+      const secilenMeal = mealler[yilGunu % mealler.length];
+      document.getElementById('gunun-meali-metni').innerText = `"${secilenMeal.text}"`;
+      document.getElementById('gunun-meali-kaynak').innerText = `— ${secilenMeal.source}`;
+
+      return secilenMeal;
+    }
+
+    // --- DİNİ GÜNLER TAKVİMİ VERİLERİ ---
+    const diniGunler = [
+      { ad: "Regaip Kandili", tarih: "2026-01-15" },
+      { ad: "Miraç Kandili", tarih: "2026-02-10" },
+      { ad: "Berat Kandili", tarih: "2026-02-26" },
+      { ad: "Ramazan Başlangıcı", tarih: "2026-03-01" },
+      { ad: "Kadir Gecesi", tarih: "2026-03-26" },
+      { ad: "Ramazan Bayramı (1. Gün)", tarih: "2026-03-30" },
+      { ad: "Kurban Bayramı (1. Gün)", tarih: "2026-06-06" },
+      { ad: "Hicri Yılbaşı", tarih: "2026-06-16" },
+      { ad: "Aşure Günü", tarih: "2026-06-25" },
+      { ad: "Mevlid Kandili", tarih: "2026-08-25" }
+    ];
+
+    function diniGunleriListele() {
+      const container = document.getElementById('dini-gunler-container');
+      container.innerHTML = '';
+      
+      const bugunStr = bugun.toISOString().split('T')[0];
+
+      diniGunler.forEach(item => {
+        const d = new Date(item.tarih);
+        const tarihStr = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+        
+        const isToday = item.tarih === bugunStr;
+        
+        container.innerHTML += `
+          <div class="dini-gun-item ${isToday ? 'today' : ''}">
+            <div>
+              <strong>${item.ad}</strong>
+              ${isToday ? '<span class="dini-gun-badge">BUGÜN</span>' : ''}
+            </div>
+            <span style="color:var(--primary); font-weight:bold;">${tarihStr}</span>
+          </div>
+        `;
+      });
+    }
 
     // --- 20 FARKLI İMAM / MÜEZZİN SES LİSTESİ ---
     const ezanSesleri = {
@@ -600,7 +671,7 @@
       if(sayfaId === 'kible') pusulayiBaslat();
     }
 
-    // --- BİLDİRİM VE ZAMANLAYICI MANTIĞI ---
+    // --- BİLDİRİM VE KİLİT EKRANI MEAL SERVİSİ ---
     let aktifTimers = [];
 
     function bildirimKontrol() {
@@ -617,7 +688,11 @@
       Notification.requestPermission().then(permission => {
         if (permission === 'granted') {
           document.getElementById('noti-permission-box').style.display = 'none';
-          alert("Bildirim izni verildi! Vakitlerde bilgilendirileceksiniz.");
+          alert("Bildirim izni verildi! Kilit ekranınızda her gün yeni bir meal görünecektir.");
+          
+          // Anında Test Bildirimi Gönder
+          const meal = gununMealiniGetir();
+          bildirimGonder("📖 Günün Ayet Meali", `"${meal.text}" (${meal.source})`);
           vakitleriGetir(document.getElementById('sehir-sec').value);
         }
       });
@@ -653,26 +728,29 @@
         const vakitTarihi = new Date();
         vakitTarihi.setHours(saat, dakika, 0, 0);
 
-        // 1. Tam Vakit Bildirimi ve Sesli Ezan
+        // Tam Vakit Bildirimi ve Sesli Ezan
         const tamVakitFark = vakitTarihi.getTime() - simdi.getTime();
         if (tamVakitFark > 0) {
           const timerId = setTimeout(() => {
             bildirimGonder("Ezan Vakti!", `${vakitIsimleri[key]} vakti girdi.`);
-            ezanCal(); // Ezan vakti girdiğinde seçili imamın sesini çal
+            ezanCal();
           }, tamVakitFark);
           aktifTimers.push(timerId);
         }
-
-        // 2. 30 Dakika Kala Bildirimi
-        const otuzDkKalaTarihi = new Date(vakitTarihi.getTime() - 30 * 60 * 1000);
-        const otuzDkKalaFark = otuzDkKalaTarihi.getTime() - simdi.getTime();
-        if (otuzDkKalaFark > 0) {
-          const timerId30 = setTimeout(() => {
-            bildirimGonder("Namaz Vakti Yaklaşıyor", `${vakitIsimleri[key]} vaktine 30 dakika kaldı.`);
-          }, otuzDkKalaFark);
-          aktifTimers.push(timerId30);
-        }
       });
+
+      // Her Sabah 08:00'de Kilit Ekranına Günün Meali Bildirimi Düşürme
+      const sabahMealTarihi = new Date();
+      sabahMealTarihi.setHours(8, 0, 0, 0);
+      const mealFark = sabahMealTarihi.getTime() - simdi.getTime();
+
+      if (mealFark > 0) {
+        const mealTimer = setTimeout(() => {
+          const meal = gununMealiniGetir();
+          bildirimGonder("📖 Günün Meali", `"${meal.text}" (${meal.source})`);
+        }, mealFark);
+        aktifTimers.push(mealTimer);
+      }
     }
 
     // Güncel Ezan Vakitlerini Aladhan API Üzerinden Çekme
@@ -772,6 +850,8 @@
     // İlk Açılış Çalıştırması
     premiumKontrol();
     bildirimKontrol();
+    gununMealiniGetir();
+    diniGunleriListele();
     vakitleriGetir(varsayilanSehir);
   </script>
 </body>
