@@ -1,0 +1,37 @@
+name: Garanti APK Uretici
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Java Kur
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Cordova Kur ve Proje Olustur
+        run: |
+          npm install -g cordova
+          cordova create myApp com.huzurvakti.app HuzurVakti
+          cd myApp
+          cordova platform add android
+          rm -rf www/*
+          cp -r ../index.html www/
+
+      - name: APK Derle
+        run: |
+          cd myApp
+          cordova build android --debug
+
+      - name: APK Dosyasini Indir
+        uses: actions/upload-artifact@v4
+        with:
+          name: HuzurVakti-APK
+          path: myApp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
