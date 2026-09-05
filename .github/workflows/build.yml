@@ -1,40 +1,40 @@
-name: Android APK Üretici
+name: APK Uretici
 
 on:
   push:
-    branches: [ "main", "master" ] # Kod hangi dala yüklendiğinde çalışacağını belirtir
-  pull_request:
-    branches: [ "main", "master" ]
-  workflow_dispatch: # Tarayıcı üzerinden manuel olarak da başlatabilmenizi sağlar
+    branches: [ main, master ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    # 1. Adım: Depodaki kodları iş akışına çeker
-    - name: Kodu Klonla
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    # 2. Adım: Java (JDK 17) ortamını kurar
-    - name: Java JDK 17 Kurulumu
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'zulu'
-        cache: 'gradle'
+      - name: Java JDK Kur
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-    # 3. Adım: Gradle çalıştırma yetkisini verir
-    - name: Gradle Yetkilendirmesi
-      run: chmod +x ./gradlew
+      - name: Node.js Kur
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-    # 4. Adım: APK dosyasını derler (Debug sürümü)
-    - name: APK Derleme (Assemble Debug)
-      run: ./gradlew assembleDebug
+      - name: Paketleri Yukle
+        run: npm install
 
-    # 5. Adım: Üretilen APK dosyasını GitHub paneline yükler (İndirilebilir hale getirir)
-    - name: APK Dosyasını Çıktı Olarak Yükle
-      uses: actions/artifacts/upload-artifact@v4
-      with:
-        name: android-debug-apk
-        path: app/build/outputs/apk/debug/app-debug.apk
+      - name: Android Prebuild (İkonsuz ve Temiz)
+        run: npx expo prebuild --platform android --clean
+
+      - name: APK Derle
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: APK Dosyasini Indir
+        uses: actions/upload-artifact@v4
+        with:
+          name: HuzurVakti-App
+          path: android/app/build/outputs/apk/debug/app-debug.apk
