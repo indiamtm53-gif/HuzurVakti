@@ -58,9 +58,12 @@
     
     /* Üst Başlık */
     .app-header { background: var(--card-bg); padding: 12px 16px; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
-    .app-title { font-size: 18px; font-weight: bold; color: var(--primary); }
+    .app-title { font-size: 18px; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 6px; }
     .app-subtitle { font-size: 11px; color: var(--text-sub); }
-    .header-controls { display: flex; gap: 6px; }
+    .header-controls { display: flex; gap: 6px; align-items: center; }
+
+    .badge-pro { background: #F59E0B; color: #000; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 6px; text-transform: uppercase; }
+    .btn-premium { background: linear-gradient(135deg, #F59E0B, #D97706); color: #FFF; border: none; padding: 6px 12px; border-radius: 12px; font-weight: bold; font-size: 11px; cursor: pointer; }
 
     /* Sayfa Kapsayıcıları */
     .page-content { padding: 16px; display: none; }
@@ -82,6 +85,20 @@
     /* Bildirim İzin Kartı */
     .noti-card { background: var(--card-bg); border: 1px dashed var(--primary); padding: 12px 16px; border-radius: 12px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
     .noti-text { font-size: 12px; color: var(--text-sub); }
+
+    /* REKLAM BANNER ALANI */
+    .ad-banner { background: #334155; border: 1px dashed #64748B; border-radius: 12px; padding: 12px; text-align: center; margin-bottom: 14px; position: relative; }
+    .ad-title { font-size: 10px; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    .ad-content { font-size: 13px; font-weight: bold; color: #F8FAFC; }
+    .ad-remove-btn { font-size: 10px; color: #F59E0B; text-decoration: underline; margin-top: 6px; display: inline-block; cursor: pointer; }
+
+    /* MODAL (PREMİUM ABONELİK PENCERESİ) */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.active { display: flex; }
+    .modal-box { background: var(--card-bg); border: 2px solid #F59E0B; border-radius: 20px; padding: 24px; width: 100%; max-width: 360px; text-align: center; position: relative; }
+    .modal-close { position: absolute; top: 12px; right: 16px; font-size: 20px; color: var(--text-sub); cursor: pointer; }
+    .plan-card { background: var(--bg-color); border: 1px solid var(--border-color); padding: 14px; border-radius: 12px; margin: 12px 0; text-align: left; }
+    .plan-price { font-size: 20px; font-weight: bold; color: #F59E0B; margin-top: 4px; }
 
     /* 2. ZİKİRMATİK SAYFASI */
     .zikir-select { width: 100%; padding: 12px; background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 12px; font-size: 14px; margin-bottom: 16px; outline: none; }
@@ -125,10 +142,15 @@
   <!-- Üst Başlık -->
   <div class="app-header">
     <div>
-      <div class="app-title" id="page-title-text">Namaz Vakitleri</div>
+      <div class="app-title">
+        <span id="page-title-text">Namaz Vakitleri</span>
+        <span id="user-pro-badge" class="badge-pro" style="display: none;">PRO</span>
+      </div>
       <div class="app-subtitle">Huzur Vakti Rehberi</div>
     </div>
     <div class="header-controls">
+      <button class="btn-premium" id="btn-go-premium" onclick="modalAc()">👑 PRO'ya Geç</button>
+
       <!-- TEMA SEÇİM LİSTESİ -->
       <select id="tema-sec" onchange="temaDegistir()">
         <option value="yesil">🎨 Zümrüt Yeşili</option>
@@ -224,8 +246,37 @@
     </div>
   </div>
 
+  <!-- PREMİUM ABONELİK MODALI -->
+  <div class="modal-overlay" id="premium-modal">
+    <div class="modal-box">
+      <span class="modal-close" onclick="modalKapat()">&times;</span>
+      <h2 style="color: #F59E0B; margin-bottom: 6px;">👑 PRO Üyelik</h2>
+      <p style="font-size: 13px; color: var(--text-sub);">Uygulamayı reklamsız kullanın ve geliştirmemize destek olun!</p>
+      
+      <div class="plan-card">
+        <div style="font-size: 12px; color: var(--text-sub);">Aylık Paket</div>
+        <div class="plan-price">₺19.99 <span style="font-size: 11px; color: var(--text-sub);">/ ay</span></div>
+        <ul style="font-size: 12px; margin-top: 8px; color: var(--text-main); padding-left: 18px;">
+          <li>%100 Reklamsız Deneyim</li>
+          <li>Özel PRO Rozeti</li>
+          <li>Geliştiriciye Destek</li>
+        </ul>
+      </div>
+
+      <button class="zikir-btn" style="background: linear-gradient(135deg, #F59E0B, #D97706); margin-bottom: 6px;" onclick="premiumSatinal()">Aboneliği Başlat (Test)</button>
+      <div style="font-size: 10px; color: var(--text-sub);">İstediğiniz zaman iptal edebilirsiniz.</div>
+    </div>
+  </div>
+
   <!-- 1. VAKİTLER SAYFASI -->
   <div id="page-vakitler" class="page-content active">
+    <!-- ÖRNEK REKLAM BANNER 1 -->
+    <div class="ad-banner app-ad-element">
+      <div class="ad-title">Sponsorlu Reklam</div>
+      <div class="ad-content">📢 Hac ve Umre Turlarında %20 İndirim Fırsatı!</div>
+      <div class="ad-remove-btn" onclick="modalAc()">Reklamları Kaldır (PRO)</div>
+    </div>
+
     <div class="hero-card">
       <div style="font-size: 12px; opacity: 0.9;">SEÇİLİ ŞEHİR</div>
       <div class="hero-time" id="hero-sehir">Ankara</div>
@@ -264,9 +315,16 @@
 
     <button class="zikir-btn" onclick="zikirCek()">ZİKİR ÇEK</button>
 
-    <div style="display: flex; justify-content: space-between;">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 14px;">
       <button class="btn-secondary" onclick="zikirSifirla()">Sıfırla</button>
       <button class="btn-secondary" onclick="hedefDegistir()">Hedef Değiştir</button>
+    </div>
+
+    <!-- ÖRNEK REKLAM BANNER 2 -->
+    <div class="ad-banner app-ad-element">
+      <div class="ad-title">Sponsorlu Reklam</div>
+      <div class="ad-content">📚 Dijital Kuran-ı Kerim ve Meal Uygulaması</div>
+      <div class="ad-remove-btn" onclick="modalAc()">Reklamları Kaldır (PRO)</div>
     </div>
   </div>
 
@@ -396,6 +454,43 @@
     document.getElementById('tema-sec').value = varsayilanTema;
     document.documentElement.setAttribute('data-theme', varsayilanTema);
 
+    // --- PREMİUM & REKLAM YÖNETİMİ ---
+    let isPremium = localStorage.getItem('isPremium') === 'true';
+
+    function premiumKontrol() {
+      const adElements = document.querySelectorAll('.app-ad-element');
+      const proBadge = document.getElementById('user-pro-badge');
+      const goProBtn = document.getElementById('btn-go-premium');
+
+      if (isPremium) {
+        adElements.forEach(el => el.style.display = 'none');
+        proBadge.style.display = 'inline-block';
+        goProBtn.innerText = '✨ PRO Üye';
+        goProBtn.onclick = null;
+      } else {
+        adElements.forEach(el => el.style.display = 'block');
+        proBadge.style.display = 'none';
+        goProBtn.innerText = '👑 PRO\'ya Geç';
+        goProBtn.onclick = modalAc;
+      }
+    }
+
+    function modalAc() {
+      document.getElementById('premium-modal').classList.add('active');
+    }
+
+    function modalKapat() {
+      document.getElementById('premium-modal').classList.remove('active');
+    }
+
+    function premiumSatinal() {
+      isPremium = true;
+      localStorage.setItem('isPremium', 'true');
+      premiumKontrol();
+      modalKapat();
+      alert("Tebrikler! PRO üyeliğiniz aktif edildi. Tüm reklamlar kaldırıldı.");
+    }
+
     function temaDegistir() {
       const yeniTema = document.getElementById('tema-sec').value;
       document.documentElement.setAttribute('data-theme', yeniTema);
@@ -453,7 +548,6 @@
     }
 
     function bildirimZamanlayicilariniKur(timings) {
-      // Önceki zamanlayıcıları temizle
       aktifTimers.forEach(t => clearTimeout(t));
       aktifTimers = [];
 
@@ -517,7 +611,6 @@
             <div class="vakit-item"><span>Akşam</span><span class="vakit-saat">${t.Maghrib}</span></div>
             <div class="vakit-item"><span>Yatsı</span><span class="vakit-saat">${t.Isha}</span></div>
           `;
-          // Vakit bildirimlerini kur
           bildirimZamanlayicilariniKur(t);
         } else {
           throw new Error("Veri çekilemedi");
@@ -593,6 +686,7 @@
     }
 
     // İlk Açılış Çalıştırması
+    premiumKontrol();
     bildirimKontrol();
     vakitleriGetir(varsayilanSehir);
   </script>
