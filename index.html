@@ -71,13 +71,17 @@
     .card-title { font-size: 15px; font-weight: bold; color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
 
     /* Controls */
-    select { background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 12px; outline: none; font-size: 12px; }
+    select, button.btn-inline { background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 12px; outline: none; font-size: 12px; cursor: pointer; }
 
     /* 1. VAKİTLER SAYFASI */
     .hero-card { background: var(--hero-grad); padding: 20px; border-radius: 20px; text-align: center; margin-bottom: 16px; color: #FFF; }
     .hero-time { font-size: 32px; font-weight: bold; margin: 6px 0; }
     .vakit-item { background: var(--card-bg); padding: 14px 18px; border-radius: 12px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .vakit-saat { font-size: 16px; font-weight: bold; color: var(--primary); }
+
+    /* Bildirim İzin Kartı */
+    .noti-card { background: var(--card-bg); border: 1px dashed var(--primary); padding: 12px 16px; border-radius: 12px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+    .noti-text { font-size: 12px; color: var(--text-sub); }
 
     /* 2. ZİKİRMATİK SAYFASI */
     .zikir-select { width: 100%; padding: 12px; background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 12px; font-size: 14px; margin-bottom: 16px; outline: none; }
@@ -226,6 +230,12 @@
       <div style="font-size: 12px; opacity: 0.9;">SEÇİLİ ŞEHİR</div>
       <div class="hero-time" id="hero-sehir">Ankara</div>
       <div style="font-size: 12px; opacity: 0.9;" id="bugun-tarih">--.--.----</div>
+    </div>
+
+    <!-- BİLDİRİM İZİN KARTI -->
+    <div class="noti-card" id="noti-permission-box">
+      <div class="noti-text">Ezan ve 30 dk kala bildirimleri için izin verin:</div>
+      <button class="btn-inline" onclick="bildirimİzniIste()">İzin Ver 🔔</button>
     </div>
 
     <div class="card">
@@ -410,6 +420,83 @@
       if(sayfaId === 'kible') pusulayiBaslat();
     }
 
+    // --- BİLDİRİM VE ZAMANLAYICI MANTIĞI ---
+    let aktifTimers = [];
+
+    function bildirimKontrol() {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        document.getElementById('noti-permission-box').style.display = 'none';
+      }
+    }
+
+    function bildirimİzniIste() {
+      if (!('Notification' in window)) {
+        alert("Tarayıcınız bildirim özelliğini desteklemiyor.");
+        return;
+      }
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          document.getElementById('noti-permission-box').style.display = 'none';
+          alert("Bildirim izni verildi! Vakitlerde bilgilendirileceksiniz.");
+          vakitleriGetir(document.getElementById('sehir-sec').value);
+        }
+      });
+    }
+
+    function bildirimGonder(baslik, mesaj) {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(baslik, {
+          body: mesaj,
+          icon: 'https://cdn-icons-png.flaticon.com/512/2913/2913524.png'
+        });
+      }
+    }
+
+    function bildirimZamanlayicilariniKur(timings) {
+      // Önceki zamanlayıcıları temizle
+      aktifTimers.forEach(t => clearTimeout(t));
+      aktifTimers = [];
+
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+      const simdi = new Date();
+      const vakitIsimleri = {
+        Imsak: "İmsak",
+        Sunrise: "Güneş",
+        Dhuhr: "Öğle",
+        Asr: "İkindi",
+        Maghrib: "Akşam",
+        Isha: "Yatsı"
+      };
+
+      Object.keys(vakitIsimleri).forEach(key => {
+        if (!timings[key]) return;
+        
+        const [saat, dakika] = timings[key].split(':').map(Number);
+        const vakitTarihi = new Date();
+        vakitTarihi.setHours(saat, dakika, 0, 0);
+
+        // 1. Tam Vakit Bildirimi
+        const tamVakitFark = vakitTarihi.getTime() - simdi.getTime();
+        if (tamVakitFark > 0) {
+          const timerId = setTimeout(() => {
+            bildirimGonder("Ezan Vakti!", `${vakitIsimleri[key]} vakti girdi.`);
+          }, tamVakitFark);
+          aktifTimers.push(timerId);
+        }
+
+        // 2. 30 Dakika Kala Bildirimi
+        const otuzDkKalaTarihi = new Date(vakitTarihi.getTime() - 30 * 60 * 1000);
+        const otuzDkKalaFark = otuzDkKalaTarihi.getTime() - simdi.getTime();
+        if (otuzDkKalaFark > 0) {
+          const timerId30 = setTimeout(() => {
+            bildirimGonder("Namaz Vakti Yaklaşıyor", `${vakitIsimleri[key]} vaktine 30 dakika kaldı.`);
+          }, otuzDkKalaFark);
+          aktifTimers.push(timerId30);
+        }
+      });
+    }
+
     // Güncel Ezan Vakitlerini Aladhan API Üzerinden Çekme
     async function vakitleriGetir(sehir) {
       document.getElementById('hero-sehir').innerText = sehir;
@@ -430,6 +517,8 @@
             <div class="vakit-item"><span>Akşam</span><span class="vakit-saat">${t.Maghrib}</span></div>
             <div class="vakit-item"><span>Yatsı</span><span class="vakit-saat">${t.Isha}</span></div>
           `;
+          // Vakit bildirimlerini kur
+          bildirimZamanlayicilariniKur(t);
         } else {
           throw new Error("Veri çekilemedi");
         }
@@ -504,6 +593,7 @@
     }
 
     // İlk Açılış Çalıştırması
+    bildirimKontrol();
     vakitleriGetir(varsayilanSehir);
   </script>
 </body>
