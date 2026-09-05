@@ -18,17 +18,10 @@ jobs:
       - name: Node.js kurulumu
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: 24
 
       - name: Bağımlılıkları yükle
         run: npm install
-
-      - name: Expo CLI kurulumu
-        run: npm install -g expo-cli
-
-      - name: Expo projesini Android native projeye dönüştür
-        run: npx expo prebuild --platform android --non-interactive
 
       - name: Java kurulumu
         uses: actions/setup-java@v4
@@ -36,7 +29,13 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Gradle ile APK oluştur
+      - name: Expo CLI kurulumu
+        run: npm install -g expo-cli
+
+      - name: Android projesini oluştur
+        run: npx expo prebuild --platform android --non-interactive
+
+      - name: APK oluştur
         working-directory: android
         run: ./gradlew assembleRelease
 
