@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Huzur Vakti</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+    body { background-color: #0F172A; color: #FFFFFF; padding: 20px; padding-bottom: 80px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .title { font-size: 24px; font-weight: bold; }
+    .subtitle { font-size: 13px; color: #94A3B8; }
+    select { background: #1E293B; color: #FFF; border: 1px solid #334155; padding: 8px 12px; border-radius: 20px; outline: none; }
+    .hero-card { background: linear-gradient(135deg, #059669, #10B981); padding: 20px; border-radius: 20px; text-align: center; margin-bottom: 20px; }
+    .hero-title { font-size: 12px; font-weight: bold; opacity: 0.9; }
+    .hero-time { font-size: 32px; font-weight: bold; margin: 8px 0; }
+    .hero-sub { font-size: 13px; opacity: 0.9; }
+    .ayet-card { background: #1E293B; border: 1px solid #334155; padding: 15px; border-radius: 16px; margin-bottom: 20px; }
+    .ayet-title { color: #10B981; font-weight: bold; font-size: 14px; margin-bottom: 4px; }
+    .ayet-text { color: #CBD5E1; font-style: italic; font-size: 13px; }
+    .vakit-item { background: #1E293B; padding: 16px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .vakit-saat { font-size: 16px; font-weight: bold; color: #10B981; }
+    .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #1E293B; display: flex; border-top: 1px solid #334155; }
+    .tab-btn { flex: 1; padding: 15px; text-align: center; color: #94A3B8; font-weight: bold; border: none; background: none; }
+    .tab-btn.active { color: #10B981; border-top: 2px solid #10B981; }
+    .zikir-page { display: none; text-align: center; padding-top: 40px; }
+    .zikir-circle { width: 180px; height: 180px; border-radius: 50%; background: #1E293B; border: 4px solid #10B981; display: flex; align-items: center; justify-content: center; margin: 30px auto; font-size: 48px; font-weight: bold; }
+    .zikir-btn { background: #10B981; color: #FFF; border: none; padding: 16px 40px; border-radius: 30px; font-size: 18px; font-weight: bold; width: 80%; margin-bottom: 15px; }
+    .reset-btn { color: #EF4444; background: none; border: none; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+  <div id="vakitler-sayfasi">
+    <div class="header">
+      <div>
+        <div class="title">Huzur Vakti</div>
+        <div class="subtitle">Diyanet Takvimi</div>
+      </div>
+      <select id="sehir-sec" onchange="vakitleriGetir()">
+        <option value="İstanbul">İstanbul</option>
+        <option value="Ankara">Ankara</option>
+        <option value="İzmir">İzmir</option>
+        <option value="Bursa">Bursa</option>
+        <option value="Antalya">Antalya</option>
+        <option value="Adana">Adana</option>
+        <option value="Konya">Konya</option>
+      </select>
+    </div>
+
+    <div class="hero-card">
+      <div class="hero-title">SEÇİLİ ŞEHİR</div>
+      <div class="hero-time" id="hero-sehir">İstanbul</div>
+      <div class="hero-sub">Ezan vakitleri canlı güncellenmektedir.</div>
+    </div>
+
+    <div class="ayet-card">
+      <div class="ayet-title">Günün Ayeti</div>
+      <div class="ayet-text">"Şüphesiz kalpler ancak Allah'ı anmakla huzur bulur." (Râd, 28)</div>
+    </div>
+
+    <div id="vakit-listesi"></div>
+  </div>
+
+  <div id="zikir-sayfasi" class="zikir-page">
+    <div class="title">Zikirmatik</div>
+    <div class="zikir-circle" id="zikir-sayac">0</div>
+    <button class="zikir-btn" onclick="zikirCek()">ZİKİR ÇEK</button> <br>
+    <button class="reset-btn" onclick="zikirSifirla()">Sıfırla</button>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab1" onclick="sayfaDegistir('vakitler')">Vakitler</button>
+    <button class="tab-btn" id="tab2" onclick="sayfaDegistir('zikir')">Zikirmatik</button>
+  </div>
+
+  <script>
+    let zikir = 0;
+    async function vakitleriGetir() {
+      const sehir = document.getElementById('sehir-sec').value;
+      document.getElementById('hero-sehir').innerText = sehir;
+      const liste = document.getElementById('vakit-listesi');
+      liste.innerHTML = '<p style="text-align:center; color:#94A3B8;">Yükleniyor...</p>';
+      try {
+        const res = await fetch(`https://ezanvakti.herokuapp.com/vakitler?il=${sehir}`);
+        const data = await res.json();
+        const v = data[0] || { Imsak:'04:42', Gunes:'06:12', Ogle:'13:10', Ikindi:'16:42', Aksam:'19:55', Yatsi:'21:18' };
+        liste.innerHTML = `
+          <div class="vakit-item"><span>İmsak</span><span class="vakit-saat">${v.Imsak}</span></div>
+          <div class="vakit-item"><span>Güneş</span><span class="vakit-saat">${v.Gunes}</span></div>
+          <div class="vakit-item"><span>Öğle</span><span class="vakit-saat">${v.Ogle}</span></div>
+          <div class="vakit-item"><span>İkindi</span><span class="vakit-saat">${v.Ikindi}</span></div>
+          <div class="vakit-item"><span>Akşam</span><span class="vakit-saat">${v.Aksam}</span></div>
+          <div class="vakit-item"><span>Yatsı</span><span class="vakit-saat">${v.Yatsi}</span></div>
+        `;
+      } catch (e) {
+        liste.innerHTML = `
+          <div class="vakit-item"><span>İmsak</span><span class="vakit-saat">04:42</span></div>
+          <div class="vakit-item"><span>Güneş</span><span class="vakit-saat">06:12</span></div>
+          <div class="vakit-item"><span>Öğle</span><span class="vakit-saat">13:10</span></div>
+          <div class="vakit-item"><span>İkindi</span><span class="vakit-saat">16:42</span></div>
+          <div class="vakit-item"><span>Akşam</span><span class="vakit-saat">19:55</span></div>
+          <div class="vakit-item"><span>Yatsı</span><span class="vakit-saat">21:18</span></div>
+        `;
+      }
+    }
+    function sayfaDegistir(sayfa) {
+      if(sayfa === 'vakitler') {
+        document.getElementById('vakitler-sayfasi').style.display = 'block';
+        document.getElementById('zikir-sayfasi').style.display = 'none';
+        document.getElementById('tab1').classList.add('active');
+        document.getElementById('tab2').classList.remove('active');
+      } else {
+        document.getElementById('vakitler-sayfasi').style.display = 'none';
+        document.getElementById('zikir-sayfasi').style.display = 'block';
+        document.getElementById('tab2').classList.add('active');
+        document.getElementById('tab1').classList.remove('active');
+      }
+    }
+    function zikirCek() {
+      zikir++;
+      document.getElementById('zikir-sayac').innerText = zikir;
+      if(navigator.vibrate) navigator.vibrate(50);
+    }
+    function zikirSifirla() {
+      zikir = 0;
+      document.getElementById('zikir-sayac').innerText = zikir;
+    }
+    vakitleriGetir();
+  </script>
+</body>
+</html>
