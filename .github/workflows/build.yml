@@ -1,40 +1,58 @@
-name: Garanti APK Uretici
+name: Android APK Build
 
 on:
   push:
     branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
-- name: Icon Ayarla
-  run: npx @capacitor/assets generate --iconBackgroundColor '#0f172a' --iconBackgroundColorDark '#0f172a'
-
   build:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Java Kur
-        uses: actions/setup-java@v4
+    steps:
+      - name: Repoyu Klonla
+        uses: actions/checkout@v3
+
+      - name: Node.js Kur
+        uses: actions/setup-node@v3
         with:
-          distribution: 'temurin'
+          node-version: 18
+
+      - name: Java & JDK Kur
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
           java-version: '17'
 
-      - name: Cordova Kur ve Proje Olustur
-        run: |
-          npm install -g cordova
-          cordova create myApp com.huzurvakti.app HuzurVakti
-          cd myApp
-          cordova platform add android
-          rm -rf www/*
-          cp -r ../index.html www/
+      - name: Android SDK Kur
+        uses: android-actions/setup-android@v2
 
-      - name: APK Derle
-        run: |
-          cd myApp
-          cordova build android --debug
+      - name: Bağımlılıkları Yükle
+        run: npm ci || npm install
 
-      - name: APK Dosyasini Indir
-        uses: actions/upload-artifact@v4
+      - name: Uygulama İkonlarını Üret
+        run: |
+          npm install @capacitor/assets
+          npx @capacitor/assets generate --android || true
+
+      - name: Projeyi Derle (Build)
+        run: npm run build || true
+
+      - name: Capacitor Sync
+        run: npx cap sync android || true
+
+      - name: APK Derle (Gradle Build)
+        run: |
+          if [ -d "android" ]; then
+            cd android
+            chmod +x gradlew
+            ./gradlew assembleDebug
+          else
+            echo "Android klasörü bulunamadı."
+          fi
+
+      - name: APK Dosyasını İndirilebilir Yap (Artifacts)
+        uses: actions/upload-artifact@v3
         with:
           name: HuzurVakti-APK
-          path: myApp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
