@@ -18,11 +18,11 @@ jobs:
         with:
           node-version: 20
 
-      - name: Java Kur (Gradle için)
+      - name: Java Kur (Gradle için - Java 21)
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - name: Bağımlılıkları Yükle
         run: |
