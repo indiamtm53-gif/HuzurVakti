@@ -29,23 +29,28 @@ jobs:
           npm install
           npm install -g @capacitor/cli @capacitor/assets
 
-      - name: Capacitor Konfigürasyonu Oluştur (Eksikse)
+      - name: Capacitor Konfigürasyonu Ayarla
         run: |
-          if [ ! -f "capacitor.config.json" ] && [ ! -f "capacitor.config.ts" ]; then
-            echo '{"appId": "com.huzurvakti.app", "appName": "Huzur Vakti", "webDir": "www"}' > capacitor.config.json
+          echo '{"appId": "com.huzurvakti.app", "appName": "Huzur Vakti", "webDir": "www"}' > capacitor.config.json
+
+      - name: Web Dosyalarını Hazırla (www Klasörü)
+        run: |
+          mkdir -p www
+          cp index.html www/index.html 2>/dev/null || true
+          if [ -f "logo.png" ]; then
+            cp logo.png www/logo.png 2>/dev/null || true
           fi
 
-      - name: Logo Hazırlığı
+      - name: Logo ve İkon Hazırlığı
         run: |
           mkdir -p assets
-          mkdir -p www
           if [ -f "logo.png" ]; then
             cp logo.png assets/icon-only.png 2>/dev/null || true
             cp logo.png assets/icon-foreground.png 2>/dev/null || true
             cp logo.png assets/icon-background.png 2>/dev/null || true
           fi
 
-      - name: Android Platformu Kontrol Et ve Ekle
+      - name: Android Platformu Ekle (Eksikse)
         run: |
           if [ ! -d "android" ]; then
             npm install @capacitor/android
@@ -55,6 +60,7 @@ jobs:
       - name: İkonları Üret ve Eşitle
         run: |
           npx @capacitor/assets generate --android || true
+          npx cap copy android
           npx cap sync android
 
       - name: APK Derle (Gradle)
