@@ -5,6 +5,9 @@ on:
     branches: [ main, master ]
 
 jobs:
+- name: Icon Ayarla
+  run: npx @capacitor/assets generate --iconBackgroundColor '#0f172a' --iconBackgroundColorDark '#0f172a'
+
   build:
     runs-on: ubuntu-latest
     steps:
