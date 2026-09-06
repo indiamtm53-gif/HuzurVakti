@@ -1,4 +1,4 @@
-name: Android APK Build
+name: Build Android APK
 
 on:
   push:
@@ -28,30 +28,45 @@ jobs:
         uses: android-actions/setup-android@v2
 
       - name: Bağımlılıkları Yükle
-        run: npm ci || npm install
-
-      - name: Uygulama İkonlarını Üret
         run: |
-          npm install @capacitor/assets
-          npx @capacitor/assets generate --android || true
+          npm install
+          npm install -g @capacitor/cli @capacitor/assets
 
-      - name: Projeyi Derle (Build)
-        run: npm run build || true
-
-      - name: Capacitor Sync
-        run: npx cap sync android || true
-
-      - name: APK Derle (Gradle Build)
+      - name: Web Uygulamasını Derle
         run: |
-          if [ -d "android" ]; then
-            cd android
-            chmod +x gradlew
-            ./gradlew assembleDebug
-          else
-            echo "Android klasörü bulunamadı."
+          npm run build || true
+
+      - name: Assets ve Logo Kontrolü
+        run: |
+          mkdir -p assets
+          if [ -f "logo.png" ]; then
+            cp logo.png assets/icon-only.png 2>/dev/null || true
+            cp logo.png assets/icon-foreground.png 2>/dev/null || true
+            cp logo.png assets/icon-background.png 2>/dev/null || true
           fi
 
-      - name: APK Dosyasını İndirilebilir Yap (Artifacts)
+      - name: Android Platform Kontrol ve Ekleme
+        run: |
+          if [ ! -d "android" ]; then
+            npm install @capacitor/android
+            npx cap add android
+          fi
+
+      - name: İkonları Üret
+        run: |
+          npx @capacitor/assets generate --android || true
+
+      - name: Capacitor Sync
+        run: |
+          npx cap sync android
+
+      - name: APK Derle (Gradle)
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: APK Dosyasını Yükle (Artifacts)
         uses: actions/upload-artifact@v3
         with:
           name: HuzurVakti-APK
