@@ -29,9 +29,16 @@ jobs:
           npm install
           npm install -g @capacitor/cli @capacitor/assets
 
+      - name: Capacitor Konfigürasyonu Oluştur (Eksikse)
+        run: |
+          if [ ! -f "capacitor.config.json" ] && [ ! -f "capacitor.config.ts" ]; then
+            echo '{"appId": "com.huzurvakti.app", "appName": "Huzur Vakti", "webDir": "www"}' > capacitor.config.json
+          fi
+
       - name: Logo Hazırlığı
         run: |
           mkdir -p assets
+          mkdir -p www
           if [ -f "logo.png" ]; then
             cp logo.png assets/icon-only.png 2>/dev/null || true
             cp logo.png assets/icon-foreground.png 2>/dev/null || true
