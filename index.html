@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Huzur Vakti</title>
+  <title>Huzur Vakti - İslami Yaşam Rehberi</title>
   <style>
     :root {
       --bg-primary: #0f172a;
@@ -14,44 +14,51 @@
       --accent-gold: #f59e0b;
     }
 
-    /* Temalar */
     body.theme-night { --bg-primary: #0f172a; --bg-card: #1e293b; --text-main: #f8fafc; --accent: #38bdf8; }
     body.theme-day { --bg-primary: #f1f5f9; --bg-card: #ffffff; --text-main: #0f172a; --text-sub: #64748b; --accent: #0284c7; }
     body.theme-green { --bg-primary: #064e3b; --bg-card: #047857; --text-main: #ecfdf5; --accent: #34d399; }
     body.theme-gold { --bg-primary: #451a03; --bg-card: #78350f; --text-main: #fffbeb; --accent: #fbbf24; }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body { background-color: var(--bg-primary); color: var(--text-main); transition: all 0.3s ease; padding-bottom: 70px; }
-    
-    header { padding: 20px; text-align: center; background: var(--bg-card); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    header h1 { font-size: 1.5rem; color: var(--accent); }
-    
-    .container { padding: 15px; max-width: 600px; margin: 0 auto; }
-    .card { background: var(--bg-card); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+    body { background-color: var(--bg-primary); color: var(--text-main); transition: all 0.3s ease; padding-bottom: 75px; }
 
-    select, button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--accent); color: #fff; font-size: 1rem; font-weight: bold; margin-top: 8px; cursor: pointer; }
+    header { padding: 18px; text-align: center; background: var(--bg-card); box-shadow: 0 2px 10px rgba(0,0,0,0.15); position: sticky; top: 0; z-index: 100; }
+    header h1 { font-size: 1.4rem; color: var(--accent); }
+
+    .container { padding: 15px; max-width: 600px; margin: 0 auto; }
+    .card { background: var(--bg-card); border-radius: 14px; padding: 16px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+
+    select, button, input { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--accent); color: #fff; font-size: 1rem; font-weight: bold; margin-top: 8px; cursor: pointer; }
     
     .time-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
-    .time-box { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; text-align: center; }
+    .time-box { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; text-align: center; }
     .time-box .label { font-size: 0.85rem; color: var(--text-sub); }
-    .time-box .val { font-size: 1.2rem; font-weight: bold; color: var(--accent); }
+    .time-box .val { font-size: 1.25rem; font-weight: bold; color: var(--accent); margin-top: 4px; }
 
     /* Kıble Pusulası */
-    .compass-container { text-align: center; position: relative; width: 200px; height: 200px; margin: 20px auto; }
-    .compass-ring { width: 100%; height: 100%; border-radius: 50%; border: 4px solid var(--accent); position: absolute; top: 0; left: 0; }
-    .compass-arrow { width: 6px; height: 90px; background: red; position: absolute; top: 10px; left: 97px; transform-origin: bottom center; transition: transform 0.1s ease-out; }
-    
-    /* Paywall / Abonelik */
+    .compass-container { text-align: center; position: relative; width: 180px; height: 180px; margin: 20px auto; }
+    .compass-ring { width: 100%; height: 100%; border-radius: 50%; border: 4px dashed var(--accent); position: absolute; top: 0; left: 0; }
+    .compass-arrow { width: 6px; height: 80px; background: #ef4444; position: absolute; top: 10px; left: 87px; transform-origin: bottom center; transition: transform 0.1s ease-out; border-radius: 3px; }
+
+    /* Kur'an & Ses Oynatıcı */
+    .quran-verse { background: rgba(0,0,0,0.15); padding: 12px; border-radius: 8px; margin-top: 10px; }
+    .arabic-text { font-size: 1.4rem; text-align: right; color: var(--accent-gold); font-family: 'Amiri', serif; margin-bottom: 8px; }
+    .meal-text { font-size: 0.95rem; color: var(--text-main); line-height: 1.4; }
+
+    /* Zikirmatik */
+    .counter-display { font-size: 3.5rem; font-weight: bold; text-align: center; color: var(--accent-gold); margin: 15px 0; }
+
+    /* Paywall Modal */
     .paywall-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; padding: 20px; overflow-y: auto; }
-    .paywall-content { background: var(--bg-card); max-width: 450px; margin: 40px auto; padding: 25px; border-radius: 16px; text-align: center; }
+    .paywall-content { background: var(--bg-card); max-width: 450px; margin: 30px auto; padding: 25px; border-radius: 16px; text-align: center; }
     .paywall-price { font-size: 2rem; font-weight: bold; color: var(--accent-gold); margin: 15px 0; }
     .legal-links { margin-top: 15px; font-size: 0.8rem; }
-    .legal-links a { color: var(--text-sub); margin: 0 5px; }
+    .legal-links a { color: var(--text-sub); margin: 0 5px; text-decoration: none; }
 
     /* Alt Navigasyon */
-    .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--bg-card); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid rgba(255,255,255,0.1); }
-    .nav-item { color: var(--text-sub); text-decoration: none; font-size: 0.8rem; text-align: center; cursor: pointer; }
-    .nav-item.active { color: var(--accent); }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-card); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.1); z-index: 99; }
+    .nav-item { color: var(--text-sub); text-decoration: none; font-size: 0.75rem; text-align: center; cursor: pointer; flex: 1; }
+    .nav-item.active { color: var(--accent); font-weight: bold; }
   </style>
 </head>
 <body class="theme-night">
@@ -62,52 +69,101 @@
 
   <div class="container">
     
-    <!-- Vakitler Ekranı -->
+    <!-- 1. VAKİTLER EKRANI -->
     <div id="tab-vakitler" class="tab-page">
       <div class="card">
         <label for="city-select">Şehir Seçin:</label>
-        <select id="city-select" onchange="vakitleriGetir()">
+        <select id="city-select" onchange="vakitleriYukle()">
           <option value="istanbul">İstanbul</option>
           <option value="ankara">Ankara</option>
           <option value="izmir">İzmir</option>
           <option value="bursa">Bursa</option>
           <option value="antalya">Antalya</option>
+          <option value="konya">Konya</option>
         </select>
       </div>
 
       <div class="card">
-        <h3>Bugünün Vakitleri</h3>
+        <h3>Bugünün Ezan Vakitleri</h3>
         <div class="time-grid">
-          <div class="time-box"><div class="label">Imsak</div><div class="val" id="v-imsak">04:45</div></div>
-          <div class="time-box"><div class="label">Güneş</div><div class="val" id="v-gunes">06:12</div></div>
-          <div class="time-box"><div class="label">Öğle</div><div class="val" id="v-ogle">13:10</div></div>
-          <div class="time-box"><div class="label">İkindi</div><div class="val" id="v-ikindi">16:45</div></div>
-          <div class="time-box"><div class="label">Akşam</div><div class="val" id="v-aksam">19:55</div></div>
-          <div class="time-box"><div class="label">Yatsı</div><div class="val" id="v-yatsi">21:20</div></div>
+          <div class="time-box"><div class="label">İmsak</div><div class="val" id="v-imsak">04:42</div></div>
+          <div class="time-box"><div class="label">Güneş</div><div class="val" id="v-gunes">06:08</div></div>
+          <div class="time-box"><div class="label">Öğle</div><div class="val" id="v-ogle">13:08</div></div>
+          <div class="time-box"><div class="label">İkindi</div><div class="val" id="v-ikindi">16:42</div></div>
+          <div class="time-box"><div class="label">Akşam</div><div class="val" id="v-aksam">19:58</div></div>
+          <div class="time-box"><div class="label">Yatsı</div><div class="val" id="v-yatsi">21:18</div></div>
         </div>
       </div>
     </div>
 
-    <!-- Kıble Bulucu Ekranı -->
+    <!-- 2. KUR'AN-I KERİM & MEAL -->
+    <div id="tab-quran" class="tab-page" style="display:none;">
+      <div class="card">
+        <h3>Kur'an-ı Kerim & Türkçe Meali</h3>
+        <select id="surah-select" onchange="sureGetir(this.value)">
+          <option value="1">1. Fatiha Suresi</option>
+          <option value="36">36. Yasin Suresi</option>
+          <option value="67">67. Mülk (Tebareke) Suresi</option>
+          <option value="78">78. Nebe (Amme) Suresi</option>
+          <option value="112">112. İhlas Suresi</option>
+          <option value="113">113. Felak Suresi</option>
+          <option value="114">114. Nas Suresi</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <audio id="quran-audio" controls style="width:100%; margin-bottom:10px;">
+          <source id="audio-source" src="https://server8.mp3quran.net/afs/001.mp3" type="audio/mp3">
+          Tarayıcınız ses oynatıcısını desteklemiyor.
+        </audio>
+        <div id="quran-content">
+          <div class="quran-verse">
+            <div class="arabic-text">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
+            <div class="meal-text">Rahmân ve Rahîm olan Allah'ın adıyla.</div>
+          </div>
+          <div class="quran-verse">
+            <div class="arabic-text">ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَالَمِينَ</div>
+            <div class="meal-text">Hamd, âlemlerin Rabbi olan Allah'a mahsustur.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. KIBLE BULUCU -->
     <div id="tab-kible" class="tab-page" style="display:none;">
       <div class="card" style="text-align: center;">
         <h3>Kıble Pusulası</h3>
-        <p style="font-size: 0.85rem; color: var(--text-sub); margin-top: 5px;">Telefonunuzu düz tutun ve kalibre etmek için 8 çizecek şekilde hareket ettirin.</p>
+        <p style="font-size: 0.85rem; color: var(--text-sub); margin-top: 5px;">Telefonunuzu düz bir zeminde tutun veya kalibre etmek için 8 çizecek şekilde sallayın.</p>
         
         <div class="compass-container">
           <div class="compass-ring"></div>
           <div class="compass-arrow" id="compass-arrow"></div>
         </div>
 
-        <button onclick="initCompass()">Pusulayı/Sensörü Başlat</button>
+        <button onclick="initCompass()">Pusula Sensörünü Başlat</button>
         <p id="compass-status" style="margin-top:10px; font-size:0.8rem; color: var(--accent-gold);"></p>
       </div>
     </div>
 
-    <!-- Ayarlar Ekranı -->
+    <!-- 4. ZİKİRMATİK & DUALAR -->
+    <div id="tab-zikir" class="tab-page" style="display:none;">
+      <div class="card" style="text-align: center;">
+        <h3>Dijital Zikirmatik</h3>
+        <div class="counter-display" id="counter-val">0</div>
+        <button onclick="arttirZikir()" style="padding:20px; font-size:1.3rem; background:var(--accent-gold);">ZİKİR ÇEK</button>
+        <button onclick="sifirlaZikir()" style="background:transparent; border:1px solid var(--text-sub); margin-top:10px;">Sıfırla</button>
+      </div>
+
+      <div class="card">
+        <h3>Günün Duası</h3>
+        <p style="margin-top:8px; line-height:1.5; color:var(--text-main);">"Rabbimiz! Bize dünyada da iyilik ver, ahirette de iyilik ver ve bizi ateş azabından koru." <i>(Bakara, 201)</i></p>
+      </div>
+    </div>
+
+    <!-- 5. AYARLAR & PREMİUM -->
     <div id="tab-ayarlar" class="tab-page" style="display:none;">
       <div class="card">
-        <h3>Tema Seçimi</h3>
+        <h3>Görünüm & Tema</h3>
         <select id="theme-select" onchange="temaDegistir(this.value)">
           <option value="theme-night">Gece (Koyu Mavi)</option>
           <option value="theme-day">Gündüz (Açık)</option>
@@ -117,23 +173,23 @@
       </div>
 
       <div class="card">
-        <h3>Bildirimler</h3>
-        <button onclick="bildirimAyarla()">Ezan Vakti Bildirimlerini Aç</button>
+        <h3>Ezan Bildirimleri</h3>
+        <button onclick="bildirimIstegi()">Bildirim İznini Kontrol Et / Aç</button>
       </div>
 
       <div class="card">
-        <h3>Üyelik</h3>
-        <button style="background: var(--accent-gold);" onclick="showPaywall()">Premium Aboneliği Yönet</button>
+        <h3>Abonelik</h3>
+        <button style="background: var(--accent-gold);" onclick="showPaywall()">Huzur Vakti Premium (15 TL/Ay)</button>
       </div>
     </div>
 
   </div>
 
-  <!-- Paywall Modal -->
+  <!-- PAYWALL MODAL -->
   <div id="paywall-modal" class="paywall-modal">
     <div class="paywall-content">
       <h2>Huzur Vakti Premium</h2>
-      <p style="margin-top:10px; color:var(--text-sub);">Reklamsız deneyim, gelişmiş ezan sesleri ve tam erişim.</p>
+      <p style="margin-top:10px; color:var(--text-sub);">Reklamsız deneyim, sınırsız Kur'an mealleri ve ezan vakti sesli uyarıları.</p>
       
       <div class="paywall-price">15 TL / Ay</div>
       
@@ -141,18 +197,20 @@
       <button onclick="restorePurchases()" style="background:transparent; border:1px solid var(--text-sub); margin-top:8px;">Satın Alımları Geri Yükle</button>
       
       <div class="legal-links">
-        <a href="#" onclick="alert('EULA: Kullanıcı Sözleşmesi detayları...'); return false;">EULA / Kullanım Şartları</a> | 
-        <a href="#" onclick="alert('Gizlilik Politikası detayları...'); return false;">Gizlilik Politikası</a>
+        <a href="#" onclick="alert('Kullanıcı Sözleşmesi (EULA): Hizmetlerimizi kullanarak şartları kabul etmiş olursunuz.'); return false;">EULA / Şartlar</a> | 
+        <a href="#" onclick="alert('Gizlilik Politikası: Verileriniz üçüncü taraflarla paylaşılmaz.'); return false;">Gizlilik Politikası</a>
       </div>
 
       <button onclick="hidePaywall()" style="background:none; color:var(--text-sub); margin-top:15px; font-size:0.85rem;">Kapat</button>
     </div>
   </div>
 
-  <!-- Alt Menü -->
+  <!-- ALT MENÜ -->
   <nav class="bottom-nav">
     <div class="nav-item active" onclick="switchTab('vakitler', this)">Vakitler</div>
-    <div class="nav-item" onclick="switchTab('kible', this)">Kıble Bulucu</div>
+    <div class="nav-item" onclick="switchTab('quran', this)">Kur'an</div>
+    <div class="nav-item" onclick="switchTab('kible', this)">Kıble</div>
+    <div class="nav-item" onclick="switchTab('zikir', this)">Zikir</div>
     <div class="nav-item" onclick="switchTab('ayarlar', this)">Ayarlar</div>
   </nav>
 
@@ -170,7 +228,7 @@
       localStorage.setItem('user_theme', temaClass);
     }
 
-    // Kıble Pusula Mantığı (Gerçek Cihaz Sensörü)
+    // Kıble Pusulası (Sensör Tabanlı)
     function initCompass() {
       const status = document.getElementById('compass-status');
       if (window.DeviceOrientationEvent) {
@@ -180,7 +238,7 @@
               if (permissionState === 'granted') {
                 window.addEventListener('deviceorientation', handleOrientation, true);
               } else {
-                status.innerText = "Pusula için konum/sensör izni verilmedi.";
+                status.innerText = "Pusula için cihaz sensör izni verilmedi.";
               }
             })
             .catch(() => { status.innerText = "Sensör erişim hatası."; });
@@ -194,35 +252,53 @@
     }
 
     function handleOrientation(event) {
-      let alpha = event.alpha || 0; // Cihaz yönü (0 - 360 derece)
-      // Türkiye ortalaması için Kıble açısı ~145-155 derece arasıdır.
-      let kibleAcisi = 148; 
+      let alpha = event.alpha || 0; 
+      let kibleAcisi = 148; // Türkiye kıble açısı
       let netAci = kibleAcisi - alpha;
       
       const arrow = document.getElementById('compass-arrow');
-      if(arrow) {
-        arrow.style.transform = `rotate(${netAci}deg)`;
-      }
+      if(arrow) arrow.style.transform = `rotate(${netAci}deg)`;
     }
 
-    function bildirimAyarla() {
+    // Zikirmatik Mantığı
+    let count = parseInt(localStorage.getItem('zikir_count') || '0');
+    document.getElementById('counter-val').innerText = count;
+
+    function arttirZikir() {
+      count++;
+      document.getElementById('counter-val').innerText = count;
+      localStorage.setItem('zikir_count', count);
+    }
+
+    function sifirlaZikir() {
+      count = 0;
+      document.getElementById('counter-val').innerText = count;
+      localStorage.setItem('zikir_count', count);
+    }
+
+    // Kur'an Sure/Ses Değiştirici
+    function sureGetir(val) {
+      const audio = document.getElementById('quran-audio');
+      const source = document.getElementById('audio-source');
+      let paddedVal = val.padStart(3, '0');
+      source.src = `https://server8.mp3quran.net/afs/${paddedVal}.mp3`;
+      audio.load();
+    }
+
+    function bildirimIstegi() {
       if ("Notification" in window) {
         Notification.requestPermission().then(permission => {
-          if (permission === "granted") {
-            alert("Ezan vakti bildirimleri aktif edildi.");
-          } else {
-            alert("Bildirim izni reddedildi.");
-          }
+          alert(permission === "granted" ? "Bildirimler aktif edildi." : "Bildirim izni reddedildi.");
         });
       } else {
-        alert("Cihazınız yerel bildirimleri desteklemiyor.");
+        alert("Cihazınız bildirim sistemini desteklemiyor.");
       }
     }
 
     function showPaywall() { document.getElementById('paywall-modal').style.display = 'block'; }
     function hidePaywall() { document.getElementById('paywall-modal').style.display = 'none'; }
-    function satinalAbonelik() { alert("Mağaza satın alma arayüzüne yönlendiriliyorsunuz (15 TL/Ay)..."); }
-    function restorePurchases() { alert("Geçmiş satın alımlar kontrol ediliyor ve geri yükleniyor..."); }
+    function satinalAbonelik() { alert("Google Play / App Store ödeme sistemine yönlendiriliyorsunuz (15 TL/Ay)..."); }
+    function restorePurchases() { alert("Abonelik geçmişiniz kontrol ediliyor ve yükleniyor..."); }
 
     // Kayıtlı Temayı Yükle
     const savedTheme = localStorage.getItem('user_theme');
