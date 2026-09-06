@@ -4,414 +4,229 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Huzur Vakti</title>
-  
-  <!-- Uygulama Simgeleri (App Icon / Favicon) -->
-  <link rel="icon" type="image/png" sizes="192x192" href="logo.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
-  <meta name="apple-mobile-web-app-icon" content="logo.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
+    :root {
+      --bg-primary: #0f172a;
+      --bg-card: #1e293b;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --accent: #38bdf8;
+      --accent-gold: #f59e0b;
     }
 
-    html, body {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      user-select: none;
-      -webkit-user-select: none;
-      touch-action: none;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
-      color: #ffffff;
-    }
+    /* Temalar */
+    body.theme-night { --bg-primary: #0f172a; --bg-card: #1e293b; --text-main: #f8fafc; --accent: #38bdf8; }
+    body.theme-day { --bg-primary: #f1f5f9; --bg-card: #ffffff; --text-main: #0f172a; --text-sub: #64748b; --accent: #0284c7; }
+    body.theme-green { --bg-primary: #064e3b; --bg-card: #047857; --text-main: #ecfdf5; --accent: #34d399; }
+    body.theme-gold { --bg-primary: #451a03; --bg-card: #78350f; --text-main: #fffbeb; --accent: #fbbf24; }
 
-    .app-container {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      width: 100%;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background-color: var(--bg-primary); color: var(--text-main); transition: all 0.3s ease; padding-bottom: 70px; }
+    
+    header { padding: 20px; text-align: center; background: var(--bg-card); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    header h1 { font-size: 1.5rem; color: var(--accent); }
+    
+    .container { padding: 15px; max-width: 600px; margin: 0 auto; }
+    .card { background: var(--bg-card); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
 
-    .header {
-      padding: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(10px);
-    }
+    select, button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--accent); color: #fff; font-size: 1rem; font-weight: bold; margin-top: 8px; cursor: pointer; }
+    
+    .time-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+    .time-box { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; text-align: center; }
+    .time-box .label { font-size: 0.85rem; color: var(--text-sub); }
+    .time-box .val { font-size: 1.2rem; font-weight: bold; color: var(--accent); }
 
-    .pro-badge {
-      background: #eab308;
-      color: #0f172a;
-      font-size: 12px;
-      font-weight: bold;
-      padding: 6px 12px;
-      border-radius: 20px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
+    /* Kıble Pusulası */
+    .compass-container { text-align: center; position: relative; width: 200px; height: 200px; margin: 20px auto; }
+    .compass-ring { width: 100%; height: 100%; border-radius: 50%; border: 4px solid var(--accent); position: absolute; top: 0; left: 0; }
+    .compass-arrow { width: 6px; height: 90px; background: red; position: absolute; top: 10px; left: 97px; transform-origin: bottom center; transition: transform 0.1s ease-out; }
+    
+    /* Paywall / Abonelik */
+    .paywall-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; padding: 20px; overflow-y: auto; }
+    .paywall-content { background: var(--bg-card); max-width: 450px; margin: 40px auto; padding: 25px; border-radius: 16px; text-align: center; }
+    .paywall-price { font-size: 2rem; font-weight: bold; color: var(--accent-gold); margin: 15px 0; }
+    .legal-links { margin-top: 15px; font-size: 0.8rem; }
+    .legal-links a { color: var(--text-sub); margin: 0 5px; }
 
-    .main-content {
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 10px 15px 80px;
-      touch-action: pan-y;
-    }
-
-    /* Location Card */
-    .location-card {
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(12px);
-      border-radius: 18px;
-      padding: 14px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      margin-bottom: 15px;
-      cursor: pointer;
-    }
-
-    /* Times Grid */
-    .times-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .time-card {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 14px;
-      padding: 15px;
-      text-align: center;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .time-card.active {
-      background: rgba(234, 179, 8, 0.2);
-      border-color: #eab308;
-    }
-
-    /* Pusula */
-    .compass-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      margin: 20px 0;
-    }
-
-    .compass {
-      width: 160px;
-      height: 160px;
-      border-radius: 50%;
-      border: 4px solid #eab308;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 20px rgba(234, 179, 8, 0.2);
-    }
-
-    .compass-needle {
-      width: 6px;
-      height: 120px;
-      position: absolute;
-      transition: transform 0.2s ease-out;
-    }
-
-    .compass-needle::before {
-      content: '🕋';
-      font-size: 20px;
-      position: absolute;
-      top: -12px;
-      left: -8px;
-    }
-
-    .compass-needle::after {
-      content: '';
-      position: absolute;
-      top: 15px;
-      left: 0;
-      width: 6px;
-      height: 45px;
-      background: #eab308;
-      border-radius: 3px;
-    }
-
-    /* Modallar (City & Paywall) */
-    .modal-overlay {
-      position: fixed;
-      bottom: -100%;
-      left: 0;
-      width: 100%;
-      height: 85vh;
-      background: #1e293b;
-      border-radius: 24px 24px 0 0;
-      transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      z-index: 1000;
-      padding: 20px;
-      box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
-      display: flex;
-      flex-direction: column;
-    }
-
-    .modal-overlay.active {
-      bottom: 0;
-    }
-
-    .search-box {
-      width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: #0f172a;
-      color: white;
-      font-size: 16px;
-      margin: 15px 0;
-      outline: none;
-    }
-
-    .city-list {
-      flex: 1;
-      overflow-y: auto;
-    }
-
-    .city-item {
-      padding: 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      font-size: 16px;
-    }
-
-    .btn {
-      background: #eab308;
-      color: #0f172a;
-      border: none;
-      padding: 14px 20px;
-      border-radius: 12px;
-      font-weight: bold;
-      width: 100%;
-      margin-top: 10px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    /* Paywall Özel Tasarımı */
-    .paywall-header {
-      text-align: center;
-      margin-bottom: 15px;
-    }
-
-    .pricing-card {
-      background: rgba(234, 179, 8, 0.1);
-      border: 2px solid #eab308;
-      border-radius: 16px;
-      padding: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 15px 0;
-    }
-
-    .apple-disclaimer {
-      font-size: 10px;
-      color: #64748b;
-      line-height: 1.4;
-      text-align: justify;
-      margin: 12px 0;
-    }
-
-    .legal-links {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      font-size: 11px;
-    }
-
-    .legal-links a {
-      color: #94a3b8;
-      text-decoration: underline;
-    }
-
-    .btn-restore {
-      background: none;
-      border: none;
-      color: #94a3b8;
-      font-size: 12px;
-      text-decoration: underline;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 8px;
-    }
+    /* Alt Navigasyon */
+    .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--bg-card); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid rgba(255,255,255,0.1); }
+    .nav-item { color: var(--text-sub); text-decoration: none; font-size: 0.8rem; text-align: center; cursor: pointer; }
+    .nav-item.active { color: var(--accent); }
   </style>
 </head>
-<body>
+<body class="theme-night">
 
-  <div class="app-container">
-    <div class="header">
-      <h2 style="font-size: 18px;">Huzur Vakti</h2>
-      <div class="pro-badge" onclick="togglePaywallModal(true)">
-        <span>👑 PRO'ya Geç</span>
+  <header>
+    <h1>Huzur Vakti</h1>
+  </header>
+
+  <div class="container">
+    
+    <!-- Vakitler Ekranı -->
+    <div id="tab-vakitler" class="tab-page">
+      <div class="card">
+        <label for="city-select">Şehir Seçin:</label>
+        <select id="city-select" onchange="vakitleriGetir()">
+          <option value="istanbul">İstanbul</option>
+          <option value="ankara">Ankara</option>
+          <option value="izmir">İzmir</option>
+          <option value="bursa">Bursa</option>
+          <option value="antalya">Antalya</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <h3>Bugünün Vakitleri</h3>
+        <div class="time-grid">
+          <div class="time-box"><div class="label">Imsak</div><div class="val" id="v-imsak">04:45</div></div>
+          <div class="time-box"><div class="label">Güneş</div><div class="val" id="v-gunes">06:12</div></div>
+          <div class="time-box"><div class="label">Öğle</div><div class="val" id="v-ogle">13:10</div></div>
+          <div class="time-box"><div class="label">İkindi</div><div class="val" id="v-ikindi">16:45</div></div>
+          <div class="time-box"><div class="label">Akşam</div><div class="val" id="v-aksam">19:55</div></div>
+          <div class="time-box"><div class="label">Yatsı</div><div class="val" id="v-yatsi">21:20</div></div>
+        </div>
       </div>
     </div>
 
-    <div class="main-content">
-      <!-- Modern Şehir Seçimi -->
-      <div class="location-card" onclick="toggleCityModal(true)">
-        <div>
-          <span style="font-size: 11px; opacity: 0.6;">SEÇİLİ KONUM</span>
-          <h3 id="cityName">İstanbul</h3>
+    <!-- Kıble Bulucu Ekranı -->
+    <div id="tab-kible" class="tab-page" style="display:none;">
+      <div class="card" style="text-align: center;">
+        <h3>Kıble Pusulası</h3>
+        <p style="font-size: 0.85rem; color: var(--text-sub); margin-top: 5px;">Telefonunuzu düz tutun ve kalibre etmek için 8 çizecek şekilde hareket ettirin.</p>
+        
+        <div class="compass-container">
+          <div class="compass-ring"></div>
+          <div class="compass-arrow" id="compass-arrow"></div>
         </div>
-        <span style="color: #eab308; font-size: 14px;">📍 Değiştir</span>
-      </div>
 
-      <!-- İzin ve Test Butonu -->
-      <button class="btn" onclick="enableNotificationsAndAudio()">🔔 Bildirimleri & Ezan Seslerini Aç</button>
-
-      <!-- Kıble Pusulası -->
-      <div class="compass-container">
-        <div class="compass">
-          <div class="compass-needle" id="needle"></div>
-        </div>
-        <small style="margin-top: 8px; opacity: 0.7;">Kıble Yönü Sensörü</small>
-      </div>
-
-      <!-- Vakitler Grid -->
-      <div class="times-grid">
-        <div class="time-card"><div>İmsak</div><strong id="imsak">05:12</strong></div>
-        <div class="time-card"><div>Güneş</div><strong id="gunes">06:38</strong></div>
-        <div class="time-card active"><div>Öğle</div><strong id="ogle">13:10</strong></div>
-        <div class="time-card"><div>İkindi</div><strong id="ikindi">16:45</strong></div>
-        <div class="time-card"><div>Akşam</div><strong id="aksam">19:32</strong></div>
-        <div class="time-card"><div>Yatsı</div><strong id="yatsi">20:52</strong></div>
+        <button onclick="initCompass()">Pusulayı/Sensörü Başlat</button>
+        <p id="compass-status" style="margin-top:10px; font-size:0.8rem; color: var(--accent-gold);"></p>
       </div>
     </div>
+
+    <!-- Ayarlar Ekranı -->
+    <div id="tab-ayarlar" class="tab-page" style="display:none;">
+      <div class="card">
+        <h3>Tema Seçimi</h3>
+        <select id="theme-select" onchange="temaDegistir(this.value)">
+          <option value="theme-night">Gece (Koyu Mavi)</option>
+          <option value="theme-day">Gündüz (Açık)</option>
+          <option value="theme-green">Yeşil Kümbet</option>
+          <option value="theme-gold">Altın Yeşili</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <h3>Bildirimler</h3>
+        <button onclick="bildirimAyarla()">Ezan Vakti Bildirimlerini Aç</button>
+      </div>
+
+      <div class="card">
+        <h3>Üyelik</h3>
+        <button style="background: var(--accent-gold);" onclick="showPaywall()">Premium Aboneliği Yönet</button>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Modern Şehir Seçim Penceresi -->
-  <div class="modal-overlay" id="cityModal">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <h3>Şehir Seçin</h3>
-      <span onclick="toggleCityModal(false)" style="font-size: 24px; cursor: pointer;">✕</span>
-    </div>
-    <input type="text" class="search-box" id="citySearch" placeholder="Şehir adı yazın..." oninput="filterCities()">
-    <div class="city-list" id="cityList"></div>
-  </div>
-
-  <!-- GERÇEK APPLE & GOOGLE UYUMLU PAYWALL MODALI -->
-  <div class="modal-overlay" id="paywallModal" style="height: 90vh;">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <h3>Huzur Vakti Premium</h3>
-      <span onclick="togglePaywallModal(false)" style="font-size: 24px; cursor: pointer;">✕</span>
-    </div>
-
-    <div style="overflow-y: auto; flex: 1; margin-top: 10px;">
-      <div class="paywall-header">
-        <p style="font-size: 13px; color: #94a3b8; margin-top: 4px;">Sınırsız 20+ Makamlı Ezan Sesi, Reklamsız Deneyim ve Dini Günler Takvimi</p>
-      </div>
-
-      <div class="pricing-card">
-        <div>
-          <strong style="display: block; font-size: 15px;">Aylık Premium Üyelik</strong>
-          <small style="color: #94a3b8; font-size: 11px;">Her ay otomatik yenilenir</small>
-        </div>
-        <div>
-          <span style="font-size: 20px; font-weight: bold; color: #eab308;">₺15,00</span>
-          <small style="color: #94a3b8;">/ay</small>
-        </div>
-      </div>
-
-      <button class="btn" onclick="startInAppPurchase()">Aboneliği Başlat (₺15,00/Ay)</button>
-      <small style="display:block; text-align:center; color:#64748b; margin-top:6px; font-size:11px;">İstediğiniz zaman mağaza üzerinden iptal edebilirsiniz.</small>
-
-      <button class="btn-restore" onclick="restorePurchases()">Satın Alımları Geri Yükle (Restore)</button>
-
-      <p class="apple-disclaimer">
-        Ödeme, satın alma onayının ardından Apple ID / Google Play hesabınızdan tahsil edilecektir. Abonelik, mevcut dönemin bitiminden en az 24 saat önce iptal edilmediği sürece otomatik olarak yenilenir. Yenileme ücreti dönemin bitiminden 24 saat önce çekilir. Aboneliğinizi mağaza hesap ayarlarınızdan yönetebilir ve iptal edebilirsiniz.
-      </p>
-
+  <!-- Paywall Modal -->
+  <div id="paywall-modal" class="paywall-modal">
+    <div class="paywall-content">
+      <h2>Huzur Vakti Premium</h2>
+      <p style="margin-top:10px; color:var(--text-sub);">Reklamsız deneyim, gelişmiş ezan sesleri ve tam erişim.</p>
+      
+      <div class="paywall-price">15 TL / Ay</div>
+      
+      <button onclick="satinalAbonelik()">Hemen Abone Ol</button>
+      <button onclick="restorePurchases()" style="background:transparent; border:1px solid var(--text-sub); margin-top:8px;">Satın Alımları Geri Yükle</button>
+      
       <div class="legal-links">
-        <a href="https://uygulamaniz.com/privacy.html" target="_blank">Gizlilik Politikası</a>
-        <span>•</span>
-        <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/" target="_blank">Kullanım Şartları (EULA)</a>
+        <a href="#" onclick="alert('EULA: Kullanıcı Sözleşmesi detayları...'); return false;">EULA / Kullanım Şartları</a> | 
+        <a href="#" onclick="alert('Gizlilik Politikası detayları...'); return false;">Gizlilik Politikası</a>
       </div>
+
+      <button onclick="hidePaywall()" style="background:none; color:var(--text-sub); margin-top:15px; font-size:0.85rem;">Kapat</button>
     </div>
   </div>
+
+  <!-- Alt Menü -->
+  <nav class="bottom-nav">
+    <div class="nav-item active" onclick="switchTab('vakitler', this)">Vakitler</div>
+    <div class="nav-item" onclick="switchTab('kible', this)">Kıble Bulucu</div>
+    <div class="nav-item" onclick="switchTab('ayarlar', this)">Ayarlar</div>
+  </nav>
 
   <script>
-    const cities = ["Adana", "Adıyaman", "Afyonkarahisar", "Ağrı", "Amasya", "Ankara", "Antalya", "Artvin", "Aydın", "Balıkesir", "Bilecik", "Bingöl", "Bitlis", "Bolu", "Burdur", "Bursa", "Çanakkale", "Çankırı", "Çorum", "Denizli", "Diyarbakır", "Edirne", "Elazığ", "Erzincan", "Erzurum", "Eskişehir", "Gaziantep", "Giresun", "Gümüşhane", "Hakkari", "Hatay", "Isparta", "Mersin", "İstanbul", "İzmir", "Kars", "Kastamonu", "Kayseri", "Kırklareli", "Kırşehir", "Kocaeli", "Konya", "Kütahya", "Malatya", "Manisa", "Kahramanmaraş", "Mardin", "Muğla", "Muş", "Nevşehir", "Niğde", "Ordu", "Rize", "Sakarya", "Samsun", "Siirt", "Sinop", "Sivas", "Tekirdağ", "Tokat", "Trabzon", "Tunceli", "Şanlıurfa", "Uşak", "Van", "Yozgat", "Zonguldak", "Aksaray", "Bayburt", "Karaman", "Kırıkkale", "Batman", "Şırnak", "Bartın", "Ardahan", "Iğdır", "Yalova", "Karabük", "Kilis", "Osmaniye", "Düzce"];
-
-    function toggleCityModal(show) {
-      document.getElementById('cityModal').classList.toggle('active', show);
-      if (show) renderCities(cities);
+    function switchTab(tabId, el) {
+      document.querySelectorAll('.tab-page').forEach(page => page.style.display = 'none');
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      document.getElementById('tab-' + tabId).style.display = 'block';
+      el.classList.add('active');
+      if(tabId === 'kible') initCompass();
     }
 
-    function togglePaywallModal(show) {
-      document.getElementById('paywallModal').classList.toggle('active', show);
+    function temaDegistir(temaClass) {
+      document.body.className = temaClass;
+      localStorage.setItem('user_theme', temaClass);
     }
 
-    function renderCities(list) {
-      const cityListEl = document.getElementById('cityList');
-      cityListEl.innerHTML = '';
-      list.forEach(city => {
-        const div = document.createElement('div');
-        div.className = 'city-item';
-        div.innerText = city;
-        div.onclick = () => {
-          document.getElementById('cityName').innerText = city;
-          toggleCityModal(false);
-        };
-        cityListEl.appendChild(div);
-      });
+    // Kıble Pusula Mantığı (Gerçek Cihaz Sensörü)
+    function initCompass() {
+      const status = document.getElementById('compass-status');
+      if (window.DeviceOrientationEvent) {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+          DeviceOrientationEvent.requestPermission()
+            .then(permissionState => {
+              if (permissionState === 'granted') {
+                window.addEventListener('deviceorientation', handleOrientation, true);
+              } else {
+                status.innerText = "Pusula için konum/sensör izni verilmedi.";
+              }
+            })
+            .catch(() => { status.innerText = "Sensör erişim hatası."; });
+        } else {
+          window.addEventListener('deviceorientation', handleOrientation, true);
+          status.innerText = "Pusula aktif.";
+        }
+      } else {
+        status.innerText = "Cihazınızda pusula sensörü desteklenmiyor.";
+      }
     }
 
-    function filterCities() {
-      const query = document.getElementById('citySearch').value.toLowerCase();
-      renderCities(cities.filter(c => c.toLowerCase().includes(query)));
+    function handleOrientation(event) {
+      let alpha = event.alpha || 0; // Cihaz yönü (0 - 360 derece)
+      // Türkiye ortalaması için Kıble açısı ~145-155 derece arasıdır.
+      let kibleAcisi = 148; 
+      let netAci = kibleAcisi - alpha;
+      
+      const arrow = document.getElementById('compass-arrow');
+      if(arrow) {
+        arrow.style.transform = `rotate(${netAci}deg)`;
+      }
     }
 
-    // Kıble Pusulası Dinleyici
-    if (window.DeviceOrientationEvent) {
-      window.addEventListener('deviceorientation', function(e) {
-        let alpha = e.alpha || 0;
-        if (e.webkitCompassHeading) alpha = e.webkitCompassHeading;
-        let needle = document.getElementById('needle');
-        if (needle) needle.style.transform = `rotate(${136 - alpha}deg)`;
-      }, true);
-    }
-
-    function enableNotificationsAndAudio() {
+    function bildirimAyarla() {
       if ("Notification" in window) {
         Notification.requestPermission().then(permission => {
-          if (permission === "granted") alert("Ezan bildirimleri aktif!");
+          if (permission === "granted") {
+            alert("Ezan vakti bildirimleri aktif edildi.");
+          } else {
+            alert("Bildirim izni reddedildi.");
+          }
         });
+      } else {
+        alert("Cihazınız yerel bildirimleri desteklemiyor.");
       }
-      let dummyAudio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-      dummyAudio.play().then(() => alert("Ezan sesleri aktif edildi!")).catch(() => {});
     }
 
-    // SATIN ALMA TETİKLEYİCİSİ (Store Kit / In-App Purchase)
-    function startInAppPurchase() {
-      alert("Store ödeme ekranına yönlendiriliyorsunuz... (15 TL/Ay)");
-      // Burada RevenueCat veya Capacitor InAppPurchase eklentisi tetiklenir
-    }
+    function showPaywall() { document.getElementById('paywall-modal').style.display = 'block'; }
+    function hidePaywall() { document.getElementById('paywall-modal').style.display = 'none'; }
+    function satinalAbonelik() { alert("Mağaza satın alma arayüzüne yönlendiriliyorsunuz (15 TL/Ay)..."); }
+    function restorePurchases() { alert("Geçmiş satın alımlar kontrol ediliyor ve geri yükleniyor..."); }
 
-    function restorePurchases() {
-      alert("Önceki satın alımlar kontrol ediliyor...");
-    }
+    // Kayıtlı Temayı Yükle
+    const savedTheme = localStorage.getItem('user_theme');
+    if(savedTheme) temaDegistir(savedTheme);
   </script>
 </body>
 </html>
