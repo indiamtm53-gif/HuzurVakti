@@ -1,76 +1,37 @@
-name: Build Android APK
+name: Garanti APK Uretici
 
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Repoyu Klonla
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Node.js Kur
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Java Kur (Gradle için - Java 21)
+      - name: Java Kur
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '17'
 
-      - name: Bağımlılıkları Yükle
+      - name: Cordova Kur ve Proje Olustur
         run: |
-          npm install
-          npm install -g @capacitor/cli @capacitor/assets
+          npm install -g cordova
+          cordova create myApp com.huzurvakti.app HuzurVakti
+          cd myApp
+          cordova platform add android
+          rm -rf www/*
+          cp -r ../index.html www/
 
-      - name: Capacitor Konfigürasyonu Ayarla
+      - name: APK Derle
         run: |
-          echo '{"appId": "com.huzurvakti.app", "appName": "Huzur Vakti", "webDir": "www"}' > capacitor.config.json
+          cd myApp
+          cordova build android --debug
 
-      - name: Web Dosyalarını Hazırla (www Klasörü)
-        run: |
-          mkdir -p www
-          cp index.html www/index.html 2>/dev/null || true
-          if [ -f "logo.png" ]; then
-            cp logo.png www/logo.png 2>/dev/null || true
-          fi
-
-      - name: Logo ve İkon Hazırlığı
-        run: |
-          mkdir -p assets
-          if [ -f "logo.png" ]; then
-            cp logo.png assets/icon-only.png 2>/dev/null || true
-            cp logo.png assets/icon-foreground.png 2>/dev/null || true
-            cp logo.png assets/icon-background.png 2>/dev/null || true
-          fi
-
-      - name: Android Platformu Ekle (Eksikse)
-        run: |
-          if [ ! -d "android" ]; then
-            npm install @capacitor/android
-            npx cap add android
-          fi
-
-      - name: İkonları Üret ve Eşitle
-        run: |
-          npx @capacitor/assets generate --android || true
-          npx cap copy android
-          npx cap sync android
-
-      - name: APK Derle (Gradle)
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug
-
-      - name: APK Dosyasını Yükle
+      - name: APK Dosyasini Indir
         uses: actions/upload-artifact@v4
         with:
           name: HuzurVakti-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: myApp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
