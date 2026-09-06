@@ -18,25 +18,18 @@ jobs:
         with:
           node-version: 20
 
-      - name: Java & JDK Kur
+      - name: Java Kur (Gradle için)
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: '17'
-
-      - name: Android SDK Kur
-        uses: android-actions/setup-android@v3
 
       - name: Bağımlılıkları Yükle
         run: |
           npm install
           npm install -g @capacitor/cli @capacitor/assets
 
-      - name: Web Uygulamasını Derle
-        run: |
-          npm run build || true
-
-      - name: Assets ve Logo Kontrolü
+      - name: Logo Hazırlığı
         run: |
           mkdir -p assets
           if [ -f "logo.png" ]; then
@@ -45,19 +38,16 @@ jobs:
             cp logo.png assets/icon-background.png 2>/dev/null || true
           fi
 
-      - name: Android Platform Kontrol ve Ekleme
+      - name: Android Platformu Kontrol Et ve Ekle
         run: |
           if [ ! -d "android" ]; then
             npm install @capacitor/android
             npx cap add android
           fi
 
-      - name: İkonları Üret
+      - name: İkonları Üret ve Eşitle
         run: |
           npx @capacitor/assets generate --android || true
-
-      - name: Capacitor Sync
-        run: |
           npx cap sync android
 
       - name: APK Derle (Gradle)
@@ -66,7 +56,7 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: APK Dosyasını Yükle (Artifacts)
+      - name: APK Dosyasını Yükle
         uses: actions/upload-artifact@v4
         with:
           name: HuzurVakti-APK
